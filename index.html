@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบดนตรีสากล (30 ข้อ)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pastel-purple-light: #f3e8ff;
+            --pastel-purple: #d8b4fe;
+            --main-purple: #9333ea;
+            --bg-gradient: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 50%, #f3e8ff 100%);
+            --card-bg: #ffffff;
+            --text-color: #4b5563;
+            --title-color: #6b21a8;
+            --correct-color: #10b981;
+            --wrong-color: #f43f5e;
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .quiz-container {
+            background-color: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(147, 51, 234, 0.12);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            box-sizing: border-box;
+            border: 2px solid #f5d0fe;
+        }
+        h1 { text-align: center; color: var(--title-color); margin-bottom: 20px; font-size: 24px; }
+        .quiz-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; background-color: var(--pastel-purple-light);
+            padding: 10px 15px; border-radius: 12px; font-weight: 500; color: var(--title-color);
+        }
+        .question-text { font-size: 18px; margin-bottom: 20px; font-weight: 600; color: #1f2937; line-height: 1.4; }
+        .options-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
+        .option-item {
+            background-color: #faf5ff; border: 2px solid #e9d5ff; border-radius: 12px;
+            padding: 12px 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 16px;
+        }
+        .option-item:hover:not(.disabled) { background-color: var(--pastel-purple); border-color: var(--main-purple); }
+        .option-item.correct { background-color: #d1fae5 !important; color: #065f46; border-color: var(--correct-color); font-weight: 600; }
+        .option-item.wrong { background-color: #ffe4e6 !important; color: #9f1239; border-color: var(--wrong-color); font-weight: 600; }
+        .option-item.disabled { cursor: not-allowed; }
+        .feedback { font-weight: 600; margin-bottom: 15px; min-height: 24px; text-align: center; }
+        .btn {
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+            color: white; border: none; border-radius: 12px; padding: 12px; font-size: 16px;
+            font-family: 'Prompt', sans-serif; cursor: pointer; width: 100%; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+        }
+        .btn:hover { background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%); }
+        .result-screen { text-align: center; }
+        .result-screen h2 { color: var(--title-color); font-size: 26px; }
+        .score-display { font-size: 20px; margin: 20px 0; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="quiz">
+        <h1>🎵 แบบทดสอบดนตรีสากล (30 ข้อ)</h1>
+        <div class="quiz-header">
+            <span id="question-number">คำถามที่ 1/30</span>
+            <span id="score-counter">คะแนน: 0</span>
+        </div>
+        <div class="question-text" id="question">กำลังโหลด...</div>
+        <ul class="options-list" id="options"></ul>
+        <div class="feedback" id="feedback"></div>
+        <button class="btn" id="next-btn" style="display: none;" onclick="nextQuestion()">ข้อถัดไป ✨</button>
+    </div>
+
+    <div class="result-screen" id="result-screen" style="display: none;">
+        <h2>🎉 สรุปผลคะแนน</h2>
+        <div class="score-display" id="final-score">คะแนนที่คุณทำได้: 0/30</div>
+        <button class="btn" onclick="restartQuiz()">ทำอีกครั้ง 🔄</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+            question: "ประวัติความเป็นมาของบันไดเสียงเมเจอร์มีรากฐานมาจากสิ่งใด?",
+            options: ["ดนตรีกรีีกโบราณ", "ดนตรีพื้นบ้านเอเชีย", "ดนตรีแจ๊สยุคใหม่", "ดนตรีลาตินอเมริกา"],
+            correct: 0
+        },
+        {
+            question: "บันไดเสียงเมเจอร์ได้รับการพัฒนาและแพร่หลายในทวีปใด?",
+            options: ["ทวีปเอเชีย", "ทวีปยุโรป", "ทวีปอเมริกาเหนือ", "ทวีปออสเตรเลีย"],
+            correct: 1
+        },
+        {
+            question: "บันไดเสียงเมเจอร์กลายเป็นพื้นฐานของอะไรในทางดนตรี?",
+            options: ["ดนตรีตะวันตกส่วนใหญ่", "ดนตรีพื้นบ้านไทย", "ดนตรีร็อกแอนด์โรลยุค 80", "การขับร้องประสานเสียงพื้นบ้าน"],
+            correct: 0
+        },
+        {
+            question: "โครงสร้างระยะห่างของบันไดเสียงเมเจอร์ (Major Scale) คือข้อใด?",
+            options: ["เต็ม ครึ่ง เต็ม เต็ม ครึ่ง เต็ม เต็ม", "เต็ม เต็ม ครึ่ง เต็ม เต็ม เต็ม ครึ่ง", "ครึ่ง เต็ม เต็ม ครึ่ง เต็ม เต็ม เต็ม", "เต็ม เต็ม เต็ม ครึ่ง เต็ม เต็ม ครึ่ง"],
+            correct: 1
+        },
+        {
+            question: "บันไดเสียงเมเจอร์ประกอบด้วยกี่ระดับเสียง (ไม่นับคู่แปด)?",
+            options: ["5 ระดับเสียง", "6 ระดับเสียง", "7 ระดับเสียง", "8 ระดับเสียง"],
+            correct: 2
+        },
+        {
+            question: "ลักษณะลำดับขั้นเสียงของบันไดเสียงเมเจอร์เป็นอย่างไร?",
+            options: ["ลำดับขั้นเสียงคงที่", "ลำดับขั้นเสียงเปลี่ยนแปลงได้", "ลำดับขั้นเสียงไม่แน่นอน", "ลดลงครึ่งเสียงตลอด"],
+            correct: 0
+        },
+        {
+            question: "ข้อใดคืออารมณ์ของบันไดเสียงเมเจอร์?",
+            options: ["โศกเศร้า ลึกลับ", "สดใส ร่าเริง", "ตึงเครียด หดหู่", "สงบเงียบ ผ่อนคลาย"],
+            correct: 1
+        },
+        {
+            question: "นอกจากสดใสและร่าเริงแล้ว อารมณ์ของบันไดเสียงเมเจอร์ยังสื่อถึงอะไรได้อีก?",
+            options: ["ความสุข ให้พลังงาน และสร้างแรงบันดาลใจ", "ความเหงา ความเศร้า", "ความน่ากลัว ตื่นเต้น", "ความอึดอัด คับข้องใจ"],
+            correct: 0
+        },
+        {
+            question: "โน้ตลำดับที่ 1 และ 8 ในสเกลเมเจอร์เรียกว่าอะไร?",
+            options: ["โทนิก (Tonic)", "ซูเปอร์โทนิค (Supertonic)", "มีเดียนต์ (Mediant)", "โดมินันต์ (Dominant)"],
+            correct: 0
+        },
+        {
+            question: "โน้ตลำดับที่ 2 ในสเกลเมเจอร์เรียกว่าอะไร?",
+            options: ["โทนิก (Tonic)", "ซูเปอร์โทนิค (Supertonic)", "มีเดียนต์ (Mediant)", "ซับโดมินันต์ (Subdominant)"],
+            correct: 1
+        },
+        {
+            question: "โน้ตลำดับที่ 3 ในสเกลเมเจอร์เรียกว่าอะไร?",
+            options: ["ซูเปอร์โทนิค (Supertonic)", "มีเดียนต์ (Mediant)", "โดมินันต์ (Dominant)", "เสียงนำ (Leading Tone)"],
+            correct: 1
+        },
+        {
+            question: "โน้ตลำดับที่ 4 ในสเกลเมเจอร์เรียกว่าอะไร?",
+            options: ["ซับโดมินันต์ (Subdominant)", "ซับมีเดียนต์ (Submediant)", "โทนิก (Tonic)", "โดมินันต์ (Dominant)"],
+            correct: 0
+        },
+        {
+            question: "โน้ตลำดับที่ 5 ในสเกลเมเจอร์เรียกว่าอะไร?",
+            options: ["มีเดียนต์ (Mediant)", "ซับมีเดียนต์ (Submediant)", "โดมินันต์ (Dominant)", "เสียงนำ (Leading Tone)"],
+            correct: 2
+        },
+        {
+            question: "โน้ตลำดับที่ 6 ในสเกลเมเจอร์เรียกว่าอะไร?",
+            options: ["ซับมีเดียนต์ (Submediant)", "ซูเปอร์โทนิค (Supertonic)", "โทนิก (Tonic)", "โดมินันต์ (Dominant)"],
+            correct: 0
+        },
+        {
+            question: "โน้ตลำดับที่ 7 ในสเกลเมเจอร์เรียกว่าอะไร?",
+            options: ["เสียงนำ (Leading Tone)", "ซับโดมินันต์ (Subdominant)", "มีเดียนต์ (Mediant)", "โทนิก (Tonic)"],
+            correct: 0
+        },
+        {
+            question: "ใน C เมเจอร์บนบรรทัด 5 เส้น ตัวโน้ตตัวแรก (ลำดับที่ 1) คือโน้ตตัวใด?",
+            options: ["โด (C)", "เร (D)", "มี (E)", "ฟา (F)"],
+            correct: 0
+        },
+        {
+            question: "บรรทัด 5 เส้น (The Five-Line Staff) ประกอบด้วยโครงสร้างหลักอย่างไร?",
+            options: ["5 เส้น และ 4 ช่อง", "4 เส้น และ 5 ช่อง", "5 เส้น และ 5 ช่อง", "6 เส้น และ 4 ช่อง"],
+            correct: 0
+        },
+        {
+            question: "โน้ตตัวกลม (Whole Note) มีค่าความยาวเท่ากับกี่จังหวะ?",
+            options: ["1 จังหวะ", "2 จังหวะ", "3 จังหวะ", "4 จังหวะ"],
+            correct: 3
+        },
+        {
+            question: "ตัวหยุดโน้ตของโน้ตตัวกลม (Whole Rest) มีค่าความยาวเท่ากับกี่จังหวะ?",
+            options: ["1 จังหวะ", "2 จังหวะ", "3 จังหวะ", "4 จังหวะ"],
+            correct: 3
+        },
+        {
+            question: "โน้ตตัวขาว (Half Note) มีค่าความยาวเท่ากับกี่จังหวะ?",
+            options: ["1 จังหวะ", "2 จังหวะ", "3 จังหวะ", "4 จังหวะ"],
+            correct: 1
+        },
+        {
+            question: "ตัวหยุดโน้ตของโน้ตตัวขาว (Half Rest) มีค่าความยาวเท่ากับกี่จังหวะ?",
+            options: ["1 จังหวะ", "2 จังหวะ", "3 จังหวะ", "4 จังหวะ"],
+            correct: 1
+        },
+        {
+            question: "โน้ตตัวดำ (Quarter Note) มีค่าความยาวเท่ากับกี่จังหวะ?",
+            options: ["1 จังหวะ", "2 จังหวะ", "1/2 จังหวะ", "4 จังหวะ"],
+            correct: 0
+        },
+        {
+            question: "ตัวหยุดโน้ตของโน้ตตัวดำ (Quarter Rest) มีค่าความยาวเท่ากับกี่จังหวะ?",
+            options: ["1 จังหวะ", "2 จังหวะ", "1/2 จังหวะ", "1/4 จังหวะ"],
+            correct: 0
+        },
+        {
+            question: "โน้ตเขบ็ต 1 ชั้น (Eighth Note) มีค่าจังหวะเท่ากับเท่าไหร่?",
+            options: ["1 จังหวะ", "1/2 จังหวะ", "1/4 จังหวะ", "2 จังหวะ"],
+            correct: 1
+        },
+        {
+            question: "ตัวหยุดโน้ตของเขบ็ต 1 ชั้น (Eighth Rest) มีค่าจังหวะเท่ากับเท่าไหร่?",
+            options: ["1 จังหวะ", "1/2 จังหวะ", "1/4 จังหวะ", "2 จังหวะ"],
+            correct: 1
+        },
+        {
+            question: "โน้ตเขบ็ต 2 ชั้น (Sixteenth Note) มีค่าจังหวะเท่ากับเท่าไหร่?",
+            options: ["1/2 จังหวะ", "1/4 จังหวะ", "1 จังหวะ", "2 จังหวะ"],
+            correct: 1
+        },
+        {
+            question: "กุญแจเสียง (Clefs) ทำหน้าที่อะไรในทางดนตรีสากล?",
+            options: ["กำหนดช่วงเสียงของตัวโน้ต", "กำหนดจังหวะความเร็ว", "กำหนดความดังเบา", "กำหนดห้องเพลง"],
+            correct: 0
+        },
+        {
+            question: "อัตราส่วนจังหวะ (Time Signatures) ทำหน้าที่บอกสิ่งใด?",
+            options: ["บอกจำนวนจังหวะในหนึ่งห้อง และระบุโน้ตที่นับหนึ่งจังหวะ", "บอกความดังเบาของเครื่องดนตรี", "บอกระดับเสียงสูงต่ำ", "บอกชื่อผู้ประพันธ์"],
+            correct: 0
+        },
+        {
+            question: "เครื่องหมายแปลงเสียง 'แฟลต' (Flat, ♭) มีผลอย่างไรต่อระดับเสียง?",
+            options: ["ลดครึ่งเสียง", "เพิ่มครึ่งเสียง", "กลับระดับเสียงเดิม", "เพิ่มหนึ่งเสียงเต็ม"],
+            correct: 0
+        },
+        {
+            question: "เครื่องหมายแปลงเสียง 'ชาร์ป' (Sharp, ♯) มีผลอย่างไรต่อระดับเสียง?",
+            options: ["ลดครึ่งเสียง", "เพิ่มครึ่งเสียง", "กลับระดับเสียงเดิม", "ลดหนึ่งเสียงเต็ม"],
+            correct: 1
+        }
+    ];
+
+    let currentQuestion = 0, score = 0, answered = false;
+    const qEl = document.getElementById("question"), optEl = document.getElementById("options");
+    const numEl = document.getElementById("question-number"), scoreEl = document.getElementById("score-counter");
+    const feedEl = document.getElementById("feedback"), nextBtn = document.getElementById("next-btn");
+    const quizDiv = document.getElementById("quiz"), resultDiv = document.getElementById("result-screen"), finalEl = document.getElementById("final-score");
+
+    function loadQuestion() {
+        answered = false;
+        feedEl.textContent = "";
+        nextBtn.style.display = "none";
+        let q = quizData[currentQuestion];
+        numEl.textContent = `คำถามที่ ${currentQuestion + 1}/${quizData.length}`;
+        scoreEl.textContent = `คะแนน: ${score}`;
+        qEl.textContent = q.question;
+        optEl.innerHTML = "";
+        q.options.forEach((opt, idx) => {
+            const li = document.createElement("li");
+            li.className = "option-item";
+            li.textContent = opt;
+            li.onclick = () => selectOption(idx);
+            optEl.appendChild(li);
+        });
+    }
+
+    function selectOption(idx) {
+        if (answered) return;
+        answered = true;
+        let q = quizData[currentQuestion], items = optEl.children;
+        if (idx === q.correct) {
+            items[idx].classList.add("correct");
+            feedEl.textContent = "✨ ถูกต้องค่ะ!";
+            feedEl.style.color = "var(--correct-color)";
+            score++;
+            scoreEl.textContent = `คะแนน: ${score}`;
+        } else {
+            items[idx].classList.add("wrong");
+            items[q.correct].classList.add("correct");
+            feedEl.textContent = "💡 ผิดนะคะ!";
+            feedEl.style.color = "var(--wrong-color)";
+        }
+        for (let item of items) item.classList.add("disabled");
+        nextBtn.style.display = "block";
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) loadQuestion();
+        else {
+            quizDiv.style.display = "none";
+            resultDiv.style.display = "block";
+            finalEl.textContent = `คะแนนที่คุณทำได้: ${score} / ${quizData.length}`;
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestion = 0; score = 0;
+        quizDiv.style.display = "block";
+        resultDiv.style.display = "none";
+        loadQuestion();
+    }
+
+    loadQuestion();
+</script>
+</body>
+</html>
